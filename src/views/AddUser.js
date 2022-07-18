@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useContext, useReducer } from 'react';
+
 import FormField from 'components/molecules/FormField/FormField';
 import { Button } from 'components/atoms/Button/Button';
 import { UserShape } from 'types';
@@ -7,27 +7,62 @@ import { ViewWrapper } from 'components/molecules/ViewWrapper/ViewWrapper';
 import { Title } from 'components/atoms/Title/Title';
 import { UserContext } from 'providers/UsersProvider';
 
+import { useForm } from 'hooks/useForm';
+
 const initialFormState = {
   name: '',
   attendance: '',
   average: '',
+  consent: false,
+  error: '',
+};
+
+const actionTypes = {
+  inputChange: 'INPUT CHANGE',
+  clearValues: 'CLEAR VALUES',
+  consentToogle: 'CONSENT TOOGlE',
+  throwError: 'THROW ERROR',
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case actionTypes.inputChange:
+      return {
+        ...state,
+        [action.filed]: action.value,
+      };
+    case actionTypes.clearValues:
+      return initialFormState;
+
+    case actionTypes.consentToogle:
+      return {
+        ...state,
+        consent: !state.consent,
+      };
+    case actionTypes.throwError:
+      return {
+        ...state,
+        error: action.errorValue,
+      };
+    default:
+      return state;
+  }
 };
 
 const AddUser = () => {
-  const [formValues, setFormValues] = useState(initialFormState);
-  const {handleAddUser} = useContext(UserContext);
+  const { handleAddUser } = useContext(UserContext);
+  const { formValues, handleInputChange, handleClearForm, handleThrowError, handleToogleConsent } = useForm(initialFormState);
 
-  const handleInputChange = (e) => {
-    setFormValues({
-      ...formValues,
-      [e.target.name]: e.target.value,
-    });
-  };
+
 
   const handleSubmitUser = (e) => {
     e.preventDefault();
-    handleAddUser(formValues);
-    setFormValues(initialFormState);
+    if (formValues.consent) {
+      handleAddUser(formValues);
+      handleClearForm(initialFormState);
+    } else {
+      handleThrowError('You need to give consent');
+    }
   };
 
   return (
@@ -36,11 +71,11 @@ const AddUser = () => {
       <FormField label="Name" id="name" name="name" value={formValues.name} onChange={handleInputChange} />
       <FormField label="Attendance" id="attendance" name="attendance" value={formValues.attendance} onChange={handleInputChange} />
       <FormField label="Average" id="average" name="average" value={formValues.average} onChange={handleInputChange} />
+      <FormField label="Consent" id="consent" name="consent" type="checkbox" value={formValues.average} onChange={handleToogleConsent} />
       <Button type="submit">Add</Button>
+      {formValues.error ? <p>{formValues.error}</p> : null}
     </ViewWrapper>
   );
 };
-
-
 
 export default AddUser;
