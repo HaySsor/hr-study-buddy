@@ -3,11 +3,11 @@ import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import AddUser from './AddUser';
 import Dashboard from './Dashboard';
-import { renderWithProviders } from 'helper/renderWithProviders';
+import { render } from 'test-utils';
 
 describe('Input with Button', () => {
   it('Add new member to list', () => {
-    renderWithProviders(
+    render(
       <>
         <AddUser />
         <Dashboard />
@@ -19,7 +19,7 @@ describe('Input with Button', () => {
     fireEvent.click(screen.getByTestId('Consent')), fireEvent.click(screen.getByText('Add')), screen.getByText('Grażyna');
   });
   it('Prevents adding new user if the consent is not checked', () => {
-    renderWithProviders(
+    render(
       <>
         <AddUser />
         <Dashboard />
